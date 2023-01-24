@@ -22,14 +22,14 @@ func NewForumRepository(db *pgx.ConnPool) ForumRepositoryInterface {
 }
 
 func (forumStore *ForumStore) CreateForum(forum *models.Forum) (err error) {
-	_, err = forumStore.db.Exec("INSERT INTO forums (title, user_, slug) VALUES ($1, $2, $3);",
+	_, err = forumStore.db.Exec("INSERT INTO forums (title, forumCreator, slug) VALUES ($1, $2, $3);",
 		forum.Title, forum.User, forum.Slug)
 	return
 }
 
 func (forumStore *ForumStore) GetForumBySlug(slug string) (forum *models.Forum, err error) {
 	forum = new(models.Forum)
-	err = forumStore.db.QueryRow("SELECT title, user_, slug, posts, threads FROM forums WHERE slug = $1;", slug).
+	err = forumStore.db.QueryRow("SELECT title, forumCreator, slug, posts, threads FROM forums WHERE slug = $1;", slug).
 		Scan(&forum.Title, &forum.User, &forum.Slug, &forum.Posts, &forum.Threads)
 	return
 }
