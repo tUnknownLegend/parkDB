@@ -10,7 +10,17 @@ COPY . .
 RUN apt-get -y update && apt-get install -y tzdata
 RUN ln -snf /usr/share/zoneinfo/Russia/Moscow /etc/localtime && echo $TZ > /etc/timezone
 
-RUN apt-get -y update && apt-get install -y postgresql
+# RUN apt-get -y update && apt-get install -y postgresql
+RUN apt-get dist-upgrade -y
+RUN apt install gnupg2 wget vim -y
+RUN apt-get install -y lsb-release
+RUN apt-get install -y wget ca-certificates
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+# RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+# RUN wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | tee /etc/apt/trusted.gpg.d/pgdg.asc &>/dev/null
+RUN apt-get -y update
+RUN apt-get -y install -y postgresql
 USER postgres
 
 RUN /etc/init.d/postgresql start && \

@@ -2,11 +2,11 @@ CREATE EXTENSION IF NOT EXISTS CITEXT;
 CREATE UNLOGGED TABLE IF NOT EXISTS users (
   nickname CITEXT COLLATE "ucs_basic" PRIMARY KEY, 
   fullname VARCHAR(50) NOT NULL, 
-  about text, 
+  about TEXT, 
   email CITEXT NOT NULL UNIQUE
 );
 CREATE UNLOGGED TABLE IF NOT EXISTS forums (
-  title VARCHAR(50) NOT NULL, 
+  title VARCHAR(80) NOT NULL, 
   user_ CITEXT REFERENCES users (nickname), 
   slug CITEXT PRIMARY KEY, 
   posts INT DEFAULT 0, 
@@ -14,10 +14,10 @@ CREATE UNLOGGED TABLE IF NOT EXISTS forums (
 );
 CREATE UNLOGGED TABLE IF NOT EXISTS threads (
   id SERIAL PRIMARY KEY, 
-  title VARCHAR(50) NOT NULL, 
+  title VARCHAR(80) NOT NULL, 
   author CITEXT REFERENCES users (nickname), 
   forum CITEXT REFERENCES forums (slug), 
-  message text NOT NULL, 
+  message TEXT NOT NULL, 
   votes INT DEFAULT 0, 
   slug CITEXT, 
   created timestamp with time zone DEFAULT now()
@@ -26,7 +26,7 @@ CREATE UNLOGGED TABLE IF NOT EXISTS posts (
   id SERIAL PRIMARY KEY, 
   parent INT REFERENCES posts (id), 
   author CITEXT REFERENCES users (nickname), 
-  message text NOT NULL, 
+  message TEXT NOT NULL, 
   is_edited BOOLEAN DEFAULT FALSE, 
   forum CITEXT REFERENCES forums (slug), 
   thread INT REFERENCES threads (id), 
