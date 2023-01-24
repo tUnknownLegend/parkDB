@@ -1,12 +1,12 @@
 CREATE EXTENSION IF NOT EXISTS CITEXT;
 CREATE UNLOGGED TABLE IF NOT EXISTS users (
   nickname CITEXT COLLATE "ucs_basic" PRIMARY KEY, 
-  fullname VARCHAR(50) NOT NULL, 
+  fullname TEXT NOT NULL, 
   about TEXT, 
   email CITEXT NOT NULL UNIQUE
 );
 CREATE UNLOGGED TABLE IF NOT EXISTS forums (
-  title VARCHAR(80) NOT NULL, 
+  title TEXT NOT NULL, 
   user_ CITEXT REFERENCES users (nickname), 
   slug CITEXT PRIMARY KEY, 
   posts INT DEFAULT 0, 
@@ -14,7 +14,7 @@ CREATE UNLOGGED TABLE IF NOT EXISTS forums (
 );
 CREATE UNLOGGED TABLE IF NOT EXISTS threads (
   id SERIAL PRIMARY KEY, 
-  title VARCHAR(80) NOT NULL, 
+  title TEXT NOT NULL, 
   author CITEXT REFERENCES users (nickname), 
   forum CITEXT REFERENCES forums (slug), 
   message TEXT NOT NULL, 
