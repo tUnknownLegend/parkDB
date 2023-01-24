@@ -38,21 +38,18 @@ func (threadHandler *ThreadHandler) CreatePosts(c *gin.Context) {
 
 	posts := new(models.Posts)
 	if err := easyjson.UnmarshalFromReader(c.Request.Body, posts); err != nil {
-		// c.Data(errors.PrepareErrorResponse(errors.ErrBadRequest))
 		models.GetErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err := threadHandler.ThreadUsecase.CreatePosts(slugOrID, posts)
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}
 
 	postsJSON, err := posts.MarshalJSON()
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}
@@ -63,16 +60,14 @@ func (threadHandler *ThreadHandler) CreatePosts(c *gin.Context) {
 func (threadHandler *ThreadHandler) GetDetails(c *gin.Context) {
 	slugOrID := c.Param("slug_or_id")
 
-	thread, err := threadHandler.ThreadUsecase.Get(slugOrID)
+	thread, err := threadHandler.ThreadUsecase.GetPost(slugOrID)
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}
 
 	threadJSON, err := thread.MarshalJSON()
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}
@@ -85,7 +80,6 @@ func (threadHandler *ThreadHandler) UpdateDetails(c *gin.Context) {
 
 	threadUpdate := new(models.ThreadUpdate)
 	if err := easyjson.UnmarshalFromReader(c.Request.Body, threadUpdate); err != nil {
-		// c.Data(errors.PrepareErrorResponse(errors.ErrBadRequest))
 		models.GetErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -94,16 +88,14 @@ func (threadHandler *ThreadHandler) UpdateDetails(c *gin.Context) {
 		Title:   threadUpdate.Title,
 		Message: threadUpdate.Message,
 	}
-	err := threadHandler.ThreadUsecase.Update(slugOrID, thread)
+	err := threadHandler.ThreadUsecase.UpdatePost(slugOrID, thread)
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}
 
 	threadJSON, err := thread.MarshalJSON()
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}
@@ -120,7 +112,6 @@ func (threadHandler *ThreadHandler) GetThreadPosts(c *gin.Context) {
 		var err error
 		limit, err = strconv.Atoi(limitStr)
 		if err != nil {
-			// c.Data(errors.PrepareErrorResponse(errors.ErrBadRequest))
 			models.GetErrorResponse(c, http.StatusBadRequest, err.Error())
 			return
 		}
@@ -131,7 +122,6 @@ func (threadHandler *ThreadHandler) GetThreadPosts(c *gin.Context) {
 		var err error
 		since, err = strconv.Atoi(sinceStr)
 		if err != nil {
-			// c.Data(errors.PrepareErrorResponse(errors.ErrBadRequest))
 			models.GetErrorResponse(c, http.StatusBadRequest, err.Error())
 			return
 		}
@@ -146,7 +136,6 @@ func (threadHandler *ThreadHandler) GetThreadPosts(c *gin.Context) {
 		var err error
 		desc, err = strconv.ParseBool(descStr)
 		if err != nil {
-			// c.Data(errors.PrepareErrorResponse(errors.ErrBadRequest))
 			models.GetErrorResponse(c, http.StatusBadRequest, err.Error())
 			return
 		}
@@ -154,7 +143,6 @@ func (threadHandler *ThreadHandler) GetThreadPosts(c *gin.Context) {
 
 	posts, err := threadHandler.ThreadUsecase.GetPosts(slugOrID, limit, since, sort, desc)
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}
@@ -162,7 +150,6 @@ func (threadHandler *ThreadHandler) GetThreadPosts(c *gin.Context) {
 	postsJSON, err := posts.MarshalJSON()
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 
@@ -175,20 +162,17 @@ func (threadHandler *ThreadHandler) Vote(c *gin.Context) {
 	vote := new(models.Vote)
 	if err := easyjson.UnmarshalFromReader(c.Request.Body, vote); err != nil {
 		models.GetErrorResponse(c, http.StatusBadRequest, err.Error())
-		// c.Data(errors.PrepareErrorResponse(errors.ErrBadRequest))
 		return
 	}
 
 	thread, err := threadHandler.ThreadUsecase.Vote(slugOrID, vote)
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}
 
 	threadJSON, err := thread.MarshalJSON()
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}

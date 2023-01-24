@@ -7,8 +7,8 @@ import (
 )
 
 type ServiceRepositoryInterface interface {
-	Clear() (err error)
-	GetStatus() (status *models.Status, err error)
+	ClearDB() (err error)
+	GetStatusOfDB() (status *models.Status, err error)
 }
 
 type ServiceStore struct {
@@ -19,12 +19,12 @@ func NewServiceRepository(db *pgx.ConnPool) ServiceRepositoryInterface {
 	return &ServiceStore{db: db}
 }
 
-func (serviceStore *ServiceStore) Clear() (err error) {
+func (serviceStore *ServiceStore) ClearDB() (err error) {
 	_, err = serviceStore.db.Exec("TRUNCATE TABLE forums, posts, threads, user_forum, users, votes CASCADE;")
 	return
 }
 
-func (serviceStore *ServiceStore) GetStatus() (status *models.Status, err error) {
+func (serviceStore *ServiceStore) GetStatusOfDB() (status *models.Status, err error) {
 	status = &models.Status{}
 	err = serviceStore.db.QueryRow("SELECT (SELECT count(*) FROM users) AS users, "+
 		"(SELECT count(*) FROM forums) AS forums, "+

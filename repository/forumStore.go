@@ -7,10 +7,10 @@ import (
 )
 
 type ForumRepositoryInterface interface {
-	Create(forum *models.Forum) (err error)
-	GetBySlug(slug string) (forum *models.Forum, err error)
-	GetUsers(slug string, limit int, since string, desc bool) (users *[]models.User, err error)
-	GetThreads(slug string, limit int, since string, desc bool) (threads *[]models.Thread, err error)
+	CreateForum(forum *models.Forum) (err error)
+	GetForumBySlug(slug string) (forum *models.Forum, err error)
+	GetUsersOfForum(slug string, limit int, since string, desc bool) (users *[]models.User, err error)
+	GetThreadsofForum(slug string, limit int, since string, desc bool) (threads *[]models.Thread, err error)
 }
 
 type ForumStore struct {
@@ -21,20 +21,20 @@ func NewForumRepository(db *pgx.ConnPool) ForumRepositoryInterface {
 	return &ForumStore{db: db}
 }
 
-func (forumStore *ForumStore) Create(forum *models.Forum) (err error) {
+func (forumStore *ForumStore) CreateForum(forum *models.Forum) (err error) {
 	_, err = forumStore.db.Exec("INSERT INTO forums (title, user_, slug) VALUES ($1, $2, $3);",
 		forum.Title, forum.User, forum.Slug)
 	return
 }
 
-func (forumStore *ForumStore) GetBySlug(slug string) (forum *models.Forum, err error) {
+func (forumStore *ForumStore) GetForumBySlug(slug string) (forum *models.Forum, err error) {
 	forum = new(models.Forum)
 	err = forumStore.db.QueryRow("SELECT title, user_, slug, posts, threads FROM forums WHERE slug = $1;", slug).
 		Scan(&forum.Title, &forum.User, &forum.Slug, &forum.Posts, &forum.Threads)
 	return
 }
 
-func (forumStore *ForumStore) GetUsers(slug string, limit int, since string, desc bool) (users *[]models.User, err error) {
+func (forumStore *ForumStore) GetUsersOfForum(slug string, limit int, since string, desc bool) (users *[]models.User, err error) {
 	var usersSlice []models.User
 
 	var resultRows *pgx.Rows
@@ -76,7 +76,7 @@ func (forumStore *ForumStore) GetUsers(slug string, limit int, since string, des
 	return &usersSlice, nil
 }
 
-func (forumStore *ForumStore) GetThreads(slug string, limit int, since string, desc bool) (threads *[]models.Thread, err error) {
+func (forumStore *ForumStore) GetThreadsofForum(slug string, limit int, since string, desc bool) (threads *[]models.Thread, err error) {
 	var threadsSlice []models.Thread
 
 	var resultRows *pgx.Rows

@@ -6,8 +6,8 @@ import (
 )
 
 type ServiceUsecaseInterface interface {
-	Clear() (err error)
-	GetStatus() (status *models.Status, err error)
+	ClearDB() (err error)
+	GetStatusOfDB() (status *models.Status, err error)
 }
 
 type ServiceUsecase struct {
@@ -18,10 +18,10 @@ func NewServiceUsecase(serviceRepository repository.ServiceRepositoryInterface) 
 	return &ServiceUsecase{serviceRepository: serviceRepository}
 }
 
-func (serviceUseCase *ServiceUsecase) Clear() (err error) {
-	return serviceUseCase.serviceRepository.Clear()
+func (serviceUseCase *ServiceUsecase) ClearDB() (err error) {
+	return serviceUseCase.serviceRepository.ClearDB()
 }
 
-func (serviceUseCase *ServiceUsecase) GetStatus() (status *models.Status, err error) {
-	return serviceUseCase.serviceRepository.GetStatus()
+func (serviceUseCase *ServiceUsecase) GetStatusOfDB() (status *models.Status, err error) {
+	return serviceUseCase.serviceRepository.GetStatusOfDB()
 }

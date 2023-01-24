@@ -10,8 +10,8 @@ import (
 
 type ThreadUsecaseInterface interface {
 	CreatePosts(slugOrID string, posts *models.Posts) (err error)
-	Get(slugOrID string) (thread *models.Thread, err error)
-	Update(slugOrID string, thread *models.Thread) (err error)
+	GetPost(slugOrID string) (thread *models.Thread, err error)
+	UpdatePost(slugOrID string, thread *models.Thread) (err error)
 	GetPosts(slugOrID string, limit, since int, sort string, desc bool) (posts *models.Posts, err error)
 	Vote(slugOrID string, vote *models.Vote) (thread *models.Thread, err error)
 }
@@ -34,9 +34,9 @@ func (threadUsecase *ThreadUsecase) CreatePosts(slugOrID string, posts *models.P
 	id, errConv := strconv.Atoi(slugOrID)
 	var thread *models.Thread
 	if errConv != nil {
-		thread, err = threadUsecase.threadRepository.GetBySlug(slugOrID)
+		thread, err = threadUsecase.threadRepository.GetThreadBySlug(slugOrID)
 	} else {
-		thread, err = threadUsecase.threadRepository.GetByID(int64(id))
+		thread, err = threadUsecase.threadRepository.GetThreadByID(int64(id))
 	}
 
 	if err != nil {
@@ -50,7 +50,7 @@ func (threadUsecase *ThreadUsecase) CreatePosts(slugOrID string, posts *models.P
 
 	if (*posts)[0].Parent != 0 {
 		var parentPost *models.Post
-		parentPost, err = threadUsecase.postRepository.GetByID((*posts)[0].Parent)
+		parentPost, _ = threadUsecase.postRepository.GetPostByID((*posts)[0].Parent)
 		if parentPost.Thread != thread.ID {
 			err = conf.ConflictError
 			return
@@ -66,12 +66,12 @@ func (threadUsecase *ThreadUsecase) CreatePosts(slugOrID string, posts *models.P
 	return
 }
 
-func (threadUsecase *ThreadUsecase) Get(slugOrID string) (thread *models.Thread, err error) {
+func (threadUsecase *ThreadUsecase) GetPost(slugOrID string) (thread *models.Thread, err error) {
 	id, errConv := strconv.Atoi(slugOrID)
 	if errConv != nil {
-		thread, err = threadUsecase.threadRepository.GetBySlug(slugOrID)
+		thread, err = threadUsecase.threadRepository.GetThreadBySlug(slugOrID)
 	} else {
-		thread, err = threadUsecase.threadRepository.GetByID(int64(id))
+		thread, err = threadUsecase.threadRepository.GetThreadByID(int64(id))
 	}
 	if err != nil {
 		err = conf.NotFoundError
@@ -80,13 +80,13 @@ func (threadUsecase *ThreadUsecase) Get(slugOrID string) (thread *models.Thread,
 	return
 }
 
-func (threadUsecase *ThreadUsecase) Update(slugOrID string, thread *models.Thread) (err error) {
+func (threadUsecase *ThreadUsecase) UpdatePost(slugOrID string, thread *models.Thread) (err error) {
 	id, errConv := strconv.Atoi(slugOrID)
-	var oldThread *models.Thread
+	var prevThread *models.Thread
 	if errConv != nil {
-		oldThread, err = threadUsecase.threadRepository.GetBySlug(slugOrID)
+		prevThread, err = threadUsecase.threadRepository.GetThreadBySlug(slugOrID)
 	} else {
-		oldThread, err = threadUsecase.threadRepository.GetByID(int64(id))
+		prevThread, err = threadUsecase.threadRepository.GetThreadByID(int64(id))
 	}
 
 	if err != nil {
@@ -95,18 +95,18 @@ func (threadUsecase *ThreadUsecase) Update(slugOrID string, thread *models.Threa
 	}
 
 	if thread.Title != "" {
-		oldThread.Title = thread.Title
+		prevThread.Title = thread.Title
 	}
 	if thread.Message != "" {
-		oldThread.Message = thread.Message
+		prevThread.Message = thread.Message
 	}
 
-	err = threadUsecase.threadRepository.Update(oldThread)
+	err = threadUsecase.threadRepository.UpdatePost(prevThread)
 	if err != nil {
 		return
 	}
 
-	*thread = *oldThread
+	*thread = *prevThread
 
 	return
 }
@@ -115,9 +115,9 @@ func (threadUsecase *ThreadUsecase) GetPosts(slugOrID string, limit, since int, 
 	id, errConv := strconv.Atoi(slugOrID)
 	var thread *models.Thread
 	if errConv != nil {
-		thread, err = threadUsecase.threadRepository.GetBySlug(slugOrID)
+		thread, err = threadUsecase.threadRepository.GetThreadBySlug(slugOrID)
 	} else {
-		thread, err = threadUsecase.threadRepository.GetByID(int64(id))
+		thread, err = threadUsecase.threadRepository.GetThreadByID(int64(id))
 	}
 
 	if err != nil {
@@ -151,9 +151,9 @@ func (threadUsecase *ThreadUsecase) Vote(slugOrID string, vote *models.Vote) (th
 	id, errConv := strconv.Atoi(slugOrID)
 
 	if errConv != nil {
-		thread, err = threadUsecase.threadRepository.GetBySlug(slugOrID)
+		thread, err = threadUsecase.threadRepository.GetThreadBySlug(slugOrID)
 	} else {
-		thread, err = threadUsecase.threadRepository.GetByID(int64(id))
+		thread, err = threadUsecase.threadRepository.GetThreadByID(int64(id))
 	}
 
 	if err != nil {

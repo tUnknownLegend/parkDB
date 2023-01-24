@@ -63,7 +63,6 @@ func (userHandler *UserHandler) CreateUser(c *gin.Context) {
 
 	userJSON, err := user.MarshalJSON()
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}
@@ -76,14 +75,12 @@ func (userHandler *UserHandler) GetUser(c *gin.Context) {
 
 	user, err := userHandler.UserUsecase.GetUser(nickname)
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}
 
 	userJSON, err := user.MarshalJSON()
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}
@@ -98,14 +95,12 @@ func (userHandler *UserHandler) UpdateUser(c *gin.Context) {
 	if err := easyjson.UnmarshalFromReader(c.Request.Body, userUpdate); err != nil {
 		user, err := userHandler.UserUsecase.GetUser(nickname)
 		if err != nil {
-			// c.Data(errors.PrepareErrorResponse(err))
 			models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 			return
 		}
 
 		userJSON, err := user.MarshalJSON()
 		if err != nil {
-			// c.Data(errors.PrepareErrorResponse(err))
 			models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 			return
 		}
@@ -123,14 +118,12 @@ func (userHandler *UserHandler) UpdateUser(c *gin.Context) {
 
 	err := userHandler.UserUsecase.UpdateUser(user)
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}
 
 	userJSON, err := user.MarshalJSON()
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}

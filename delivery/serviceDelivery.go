@@ -22,37 +22,31 @@ func NewServiceHandler(router *gin.RouterGroup, serviceURL string, serviceUsecas
 
 	service := router.Group(handler.ServiceURL)
 	{
-		service.POST("/clear", handler.Clear)
-		service.GET("/status", handler.GetStatus)
+		service.POST("/clear", handler.ClearService)
+		service.GET("/status", handler.GetServiceStatus)
 	}
 }
 
-func (serviceHandler *ServiceHandler) Clear(c *gin.Context) {
-	err := serviceHandler.ServiceUsecase.Clear()
+func (serviceHandler *ServiceHandler) ClearService(c *gin.Context) {
+	err := serviceHandler.ServiceUsecase.ClearDB()
 	if err != nil {
-		// c.Data(errors.PrepareErrorResponse(err))
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-
 		return
 	}
 
 	c.Status(http.StatusOK)
 }
 
-func (serviceHandler *ServiceHandler) GetStatus(c *gin.Context) {
-	status, err := serviceHandler.ServiceUsecase.GetStatus()
+func (serviceHandler *ServiceHandler) GetServiceStatus(c *gin.Context) {
+	status, err := serviceHandler.ServiceUsecase.GetStatusOfDB()
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 
 	statusJSON, err := status.MarshalJSON()
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 

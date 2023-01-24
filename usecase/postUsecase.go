@@ -35,7 +35,7 @@ func NewPostUsecase(
 func (postUsecase *PostUsecase) Get(postID int64, relatedData *[]string) (postFull *models.PostFull, err error) {
 	postFull = new(models.PostFull)
 	var post *models.Post
-	post, err = postUsecase.postRepository.GetByID(postID)
+	post, err = postUsecase.postRepository.GetPostByID(postID)
 	if err != nil {
 		err = conf.NotFoundError
 		return
@@ -53,14 +53,14 @@ func (postUsecase *PostUsecase) Get(postID int64, relatedData *[]string) (postFu
 			postFull.Author = author
 		case "forum":
 			var forum *models.Forum
-			forum, err = postUsecase.forumRepository.GetBySlug(postFull.Post.Forum)
+			forum, err = postUsecase.forumRepository.GetForumBySlug(postFull.Post.Forum)
 			if err != nil {
 				err = conf.NotFoundError
 			}
 			postFull.Forum = forum
 		case "thread":
 			var thread *models.Thread
-			thread, err = postUsecase.threadRepository.GetByID(postFull.Post.Thread)
+			thread, err = postUsecase.threadRepository.GetThreadByID(postFull.Post.Thread)
 			if err != nil {
 				err = conf.NotFoundError
 			}
@@ -71,7 +71,7 @@ func (postUsecase *PostUsecase) Get(postID int64, relatedData *[]string) (postFu
 }
 
 func (postUsecase *PostUsecase) Update(post *models.Post) (err error) {
-	oldPost, err := postUsecase.postRepository.GetByID(post.ID)
+	oldPost, err := postUsecase.postRepository.GetPostByID(post.ID)
 	if err != nil {
 		err = conf.NotFoundError
 		return
@@ -83,7 +83,7 @@ func (postUsecase *PostUsecase) Update(post *models.Post) (err error) {
 		}
 		oldPost.Message = post.Message
 
-		err = postUsecase.postRepository.Update(oldPost)
+		err = postUsecase.postRepository.UpdatePost(oldPost)
 		if err != nil {
 			return
 		}

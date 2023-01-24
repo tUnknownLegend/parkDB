@@ -47,16 +47,12 @@ func (postHandler *PostHandler) GetPost(c *gin.Context) {
 	postFull, err := postHandler.PostUsecase.Get(int64(postID), &relatedDataArr)
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 
 	postFullJSON, err := postFull.MarshalJSON()
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 
@@ -68,16 +64,12 @@ func (postHandler *PostHandler) UpdatePost(c *gin.Context) {
 	postID, err := strconv.Atoi(postIDstr)
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 
 	postUpdate := new(models.PostUpdate)
 	if err := easyjson.UnmarshalFromReader(c.Request.Body, postUpdate); err != nil {
 		models.GetErrorResponse(c, http.StatusBadRequest, err.Error())
-
-		// c.Data(errors.PrepareErrorResponse(errors.ErrBadRequest))
 		return
 	}
 
@@ -88,16 +80,12 @@ func (postHandler *PostHandler) UpdatePost(c *gin.Context) {
 	err = postHandler.PostUsecase.Update(post)
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 
 	postJSON, err := post.MarshalJSON()
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 

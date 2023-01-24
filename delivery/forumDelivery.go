@@ -37,7 +37,6 @@ func NewForumHandler(router *gin.RouterGroup, forumURL string, forumUsecase usec
 func (forumHandler *ForumHandler) CreateForum(c *gin.Context) {
 	forum := new(models.Forum)
 	if err := easyjson.UnmarshalFromReader(c.Request.Body, forum); err != nil {
-		// models.GetErrorResponse(c, 405, err.Error())
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		return
 	}
@@ -48,13 +47,10 @@ func (forumHandler *ForumHandler) CreateForum(c *gin.Context) {
 			forumJSON, errInt := forum.MarshalJSON()
 			if errInt != nil {
 				models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-				// models.GetErrorResponse(c, 400, err.Error())
 				return
 			}
 			c.Data(conf.GetErrorCode(err), conf.Headers, forumJSON)
-			// c.Data(401, conf.Headers, forumJSON)
 		} else {
-			// models.GetErrorResponse(c, 402, err.Error())
 			models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
 		}
 		return
@@ -63,7 +59,6 @@ func (forumHandler *ForumHandler) CreateForum(c *gin.Context) {
 	forumJSON, err := forum.MarshalJSON()
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 
@@ -73,17 +68,15 @@ func (forumHandler *ForumHandler) CreateForum(c *gin.Context) {
 func (forumHandler *ForumHandler) GetDetails(c *gin.Context) {
 	slug := c.Param("slug")
 
-	forum, err := forumHandler.ForumUsecase.Get(slug)
+	forum, err := forumHandler.ForumUsecase.GetForumBySlug(slug)
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 
 	forumJSON, err := forum.MarshalJSON()
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 
@@ -96,7 +89,6 @@ func (forumHandler *ForumHandler) CreateThread(c *gin.Context) {
 	thread := new(models.Thread)
 	if err := easyjson.UnmarshalFromReader(c.Request.Body, thread); err != nil {
 		models.GetErrorResponse(c, http.StatusBadRequest, err.Error())
-		// c.Data(errors.PrepareErrorResponse(errors.ErrBadRequest))
 		return
 	}
 	thread.Forum = slug
@@ -119,7 +111,6 @@ func (forumHandler *ForumHandler) CreateThread(c *gin.Context) {
 	threadJSON, err := thread.MarshalJSON()
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 
@@ -136,7 +127,6 @@ func (forumHandler *ForumHandler) GetForumUsers(c *gin.Context) {
 		limit, err = strconv.Atoi(limitStr)
 		if err != nil {
 			models.GetErrorResponse(c, http.StatusBadRequest, err.Error())
-			// c.Data(errors.PrepareErrorResponse(errors.ErrBadRequest))
 			return
 		}
 	}
@@ -148,22 +138,19 @@ func (forumHandler *ForumHandler) GetForumUsers(c *gin.Context) {
 		desc, err = strconv.ParseBool(descStr)
 		if err != nil {
 			models.GetErrorResponse(c, http.StatusBadRequest, err.Error())
-			// c.Data(errors.PrepareErrorResponse(errors.ErrBadRequest))
 			return
 		}
 	}
 
-	users, err := forumHandler.ForumUsecase.GetUsers(slug, limit, since, desc)
+	users, err := forumHandler.ForumUsecase.GetUsersOfForum(slug, limit, since, desc)
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 
 	usersJSON, err := users.MarshalJSON()
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 
@@ -180,7 +167,6 @@ func (forumHandler *ForumHandler) GetForumThreads(c *gin.Context) {
 		limit, err = strconv.Atoi(limitStr)
 		if err != nil {
 			models.GetErrorResponse(c, http.StatusBadRequest, err.Error())
-			// c.Data(errors.PrepareErrorResponse(errors.ErrBadRequest))
 			return
 		}
 	}
@@ -192,22 +178,19 @@ func (forumHandler *ForumHandler) GetForumThreads(c *gin.Context) {
 		desc, err = strconv.ParseBool(descStr)
 		if err != nil {
 			models.GetErrorResponse(c, http.StatusBadRequest, err.Error())
-			// c.Data(errors.PrepareErrorResponse(errors.ErrBadRequest))
 			return
 		}
 	}
 
-	threads, err := forumHandler.ForumUsecase.GetThreads(slug, limit, since, desc)
+	threads, err := forumHandler.ForumUsecase.GetThreadsOfForum(slug, limit, since, desc)
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 
 	threadsJSON, err := threads.MarshalJSON()
 	if err != nil {
 		models.GetErrorResponse(c, conf.GetErrorCode(err), err.Error())
-		// c.Data(errors.PrepareErrorResponse(err))
 		return
 	}
 

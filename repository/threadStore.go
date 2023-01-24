@@ -9,16 +9,16 @@ import (
 )
 
 type ThreadRepositoryInterface interface {
-	Create(thread *models.Thread) (err error)
-	GetByID(id int64) (thread *models.Thread, err error)
-	GetBySlug(slug string) (thread *models.Thread, err error)
-	GetBySlugOrID(slugOrID string) (thread *models.Thread, err error)
-	GetVotes(id int64) (votesAmount int32, err error)
-	Update(thread *models.Thread) (err error)
+	CreatePost(thread *models.Thread) (err error)
+	GetThreadByID(id int64) (thread *models.Thread, err error)
+	GetThreadBySlug(slug string) (thread *models.Thread, err error)
+	GetThreadBySlugOrID(slugOrID string) (thread *models.Thread, err error)
+	UpdatePost(thread *models.Thread) (err error)
 	CreatePosts(thread *models.Thread, posts *models.Posts) (err error)
 	GetPostsTree(threadID int64, limit, since int, desc bool) (posts *[]models.Post, err error)
 	GetPostsParentTree(threadID int64, limit, since int, desc bool) (posts *[]models.Post, err error)
 	GetPostsFlat(threadID int64, limit, since int, desc bool) (posts *[]models.Post, err error)
+	GetVotes(id int64) (votesAmount int32, err error)
 	Vote(threadID int64, vote *models.Vote) (err error)
 }
 
@@ -30,7 +30,7 @@ func NewThreadRepository(db *pgx.ConnPool) ThreadRepositoryInterface {
 	return &ThreadStore{db: db}
 }
 
-func (threadStore *ThreadStore) Create(thread *models.Thread) (err error) {
+func (threadStore *ThreadStore) CreatePost(thread *models.Thread) (err error) {
 	err = threadStore.db.QueryRow("INSERT INTO threads (title, author, forum, message, slug, created) "+
 		"VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, created;",
 		thread.Title, thread.Author, thread.Forum, thread.Message, thread.Slug, thread.Created).
@@ -38,7 +38,7 @@ func (threadStore *ThreadStore) Create(thread *models.Thread) (err error) {
 	return
 }
 
-func (threadStore *ThreadStore) GetByID(id int64) (thread *models.Thread, err error) {
+func (threadStore *ThreadStore) GetThreadByID(id int64) (thread *models.Thread, err error) {
 	thread = &models.Thread{}
 	err = threadStore.db.QueryRow("SELECT id, title, author, forum, message, votes, slug, created FROM threads "+
 		"WHERE id = $1;", id).
@@ -46,7 +46,7 @@ func (threadStore *ThreadStore) GetByID(id int64) (thread *models.Thread, err er
 	return
 }
 
-func (threadStore *ThreadStore) GetBySlug(slug string) (thread *models.Thread, err error) {
+func (threadStore *ThreadStore) GetThreadBySlug(slug string) (thread *models.Thread, err error) {
 	thread = &models.Thread{}
 	err = threadStore.db.QueryRow("SELECT id, title, author, forum, message, votes, slug, created FROM threads "+
 		"WHERE slug = $1;", slug).
@@ -54,7 +54,7 @@ func (threadStore *ThreadStore) GetBySlug(slug string) (thread *models.Thread, e
 	return
 }
 
-func (threadStore *ThreadStore) GetBySlugOrID(slugOrID string) (thread *models.Thread, err error) {
+func (threadStore *ThreadStore) GetThreadBySlugOrID(slugOrID string) (thread *models.Thread, err error) {
 	thread = &models.Thread{}
 	err = threadStore.db.QueryRow("SELECT id, title, author, forum, message, votes, slug, created FROM threads "+
 		"WHERE id = $1 OR slug = $2;", slugOrID, slugOrID).
@@ -67,7 +67,7 @@ func (threadStore *ThreadStore) GetVotes(id int64) (votesAmount int32, err error
 	return
 }
 
-func (threadStore *ThreadStore) Update(thread *models.Thread) (err error) {
+func (threadStore *ThreadStore) UpdatePost(thread *models.Thread) (err error) {
 	_, err = threadStore.db.Exec("UPDATE threads SET "+
 		"title = $1, message = $2 WHERE id = $3;", thread.Title, thread.Message, thread.ID)
 	return

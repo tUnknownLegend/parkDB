@@ -8,10 +8,10 @@ import (
 
 type ForumUsecaseInterface interface {
 	CreateForum(forum *models.Forum) (err error)
-	Get(slug string) (forum *models.Forum, err error)
+	GetForumBySlug(slug string) (forum *models.Forum, err error)
 	CreateThread(thread *models.Thread) (err error)
-	GetUsers(slug string, limit int, since string, desc bool) (users *models.Users, err error)
-	GetThreads(slug string, limit int, since string, desc bool) (threads *models.Threads, err error)
+	GetUsersOfForum(slug string, limit int, since string, desc bool) (users *models.Users, err error)
+	GetThreadsOfForum(slug string, limit int, since string, desc bool) (threads *models.Threads, err error)
 }
 
 type ForumUsecase struct {
@@ -31,7 +31,7 @@ func (forumUsecase *ForumUsecase) CreateForum(forum *models.Forum) (err error) {
 		return
 	}
 
-	oldForum, err := forumUsecase.forumRepository.GetBySlug(forum.Slug)
+	oldForum, _ := forumUsecase.forumRepository.GetForumBySlug(forum.Slug)
 	if oldForum.Slug != "" {
 		*forum = *oldForum
 		err = conf.ConflictError
@@ -39,12 +39,12 @@ func (forumUsecase *ForumUsecase) CreateForum(forum *models.Forum) (err error) {
 	}
 
 	forum.User = user.Nickname
-	err = forumUsecase.forumRepository.Create(forum)
+	err = forumUsecase.forumRepository.CreateForum(forum)
 	return
 }
 
-func (forumUsecase *ForumUsecase) Get(slug string) (forum *models.Forum, err error) {
-	forum, err = forumUsecase.forumRepository.GetBySlug(slug)
+func (forumUsecase *ForumUsecase) GetForumBySlug(slug string) (forum *models.Forum, err error) {
+	forum, err = forumUsecase.forumRepository.GetForumBySlug(slug)
 	if err != nil {
 		err = conf.NotFoundError
 	}
@@ -52,7 +52,7 @@ func (forumUsecase *ForumUsecase) Get(slug string) (forum *models.Forum, err err
 }
 
 func (forumUsecase *ForumUsecase) CreateThread(thread *models.Thread) (err error) {
-	forum, err := forumUsecase.forumRepository.GetBySlug(thread.Forum)
+	forum, err := forumUsecase.forumRepository.GetForumBySlug(thread.Forum)
 	if err != nil {
 		err = conf.NotFoundError
 		return
@@ -64,7 +64,7 @@ func (forumUsecase *ForumUsecase) CreateThread(thread *models.Thread) (err error
 		return
 	}
 
-	oldThread, err := forumUsecase.threadRepository.GetBySlug(thread.Slug)
+	oldThread, _ := forumUsecase.threadRepository.GetThreadBySlug(thread.Slug)
 	if oldThread.Slug != "" {
 		*thread = *oldThread
 		err = conf.ConflictError
@@ -72,18 +72,18 @@ func (forumUsecase *ForumUsecase) CreateThread(thread *models.Thread) (err error
 	}
 
 	thread.Forum = forum.Slug
-	err = forumUsecase.threadRepository.Create(thread)
+	err = forumUsecase.threadRepository.CreatePost(thread)
 	return
 }
 
-func (forumUsecase *ForumUsecase) GetUsers(slug string, limit int, since string, desc bool) (users *models.Users, err error) {
-	_, err = forumUsecase.forumRepository.GetBySlug(slug)
+func (forumUsecase *ForumUsecase) GetUsersOfForum(slug string, limit int, since string, desc bool) (users *models.Users, err error) {
+	_, err = forumUsecase.forumRepository.GetForumBySlug(slug)
 	if err != nil {
 		err = conf.NotFoundError
 		return
 	}
 
-	usersSlice, err := forumUsecase.forumRepository.GetUsers(slug, limit, since, desc)
+	usersSlice, err := forumUsecase.forumRepository.GetUsersOfForum(slug, limit, since, desc)
 	if err != nil {
 		return
 	}
@@ -97,14 +97,14 @@ func (forumUsecase *ForumUsecase) GetUsers(slug string, limit int, since string,
 	return
 }
 
-func (forumUsecase *ForumUsecase) GetThreads(slug string, limit int, since string, desc bool) (threads *models.Threads, err error) {
-	forum, err := forumUsecase.forumRepository.GetBySlug(slug)
+func (forumUsecase *ForumUsecase) GetThreadsOfForum(slug string, limit int, since string, desc bool) (threads *models.Threads, err error) {
+	forum, err := forumUsecase.forumRepository.GetForumBySlug(slug)
 	if err != nil {
 		err = conf.NotFoundError
 		return
 	}
 
-	threadsSlice, err := forumUsecase.forumRepository.GetThreads(forum.Slug, limit, since, desc)
+	threadsSlice, err := forumUsecase.forumRepository.GetThreadsofForum(forum.Slug, limit, since, desc)
 	if err != nil {
 		return
 	}
