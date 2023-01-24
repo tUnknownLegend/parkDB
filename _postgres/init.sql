@@ -1,7 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS CITEXT;
 
 CREATE UNLOGGED TABLE IF NOT EXISTS users (
-  nickname CITEXT COLLATE "UNICODE" PRIMARY KEY, 
+  nickname CITEXT PRIMARY KEY, 
   fullname TEXT NOT NULL, 
   about TEXT, 
   email CITEXT NOT NULL UNIQUE
@@ -39,14 +39,14 @@ CREATE UNLOGGED TABLE IF NOT EXISTS posts (
 );
 
 CREATE UNLOGGED TABLE IF NOT EXISTS votes (
-  nickname CITEXT REFERENCES COLLATE "UNICODE" users (nickname), 
+  nickname CITEXT REFERENCES users (nickname), 
   thread INT REFERENCES threads (id), 
   voice INT NOT NULL,
   UNIQUE (nickname, thread)
 );
 
 CREATE UNLOGGED TABLE IF NOT EXISTS userForum (
-  nickname CITEXT COLLATE "UNICODE"  REFERENCES users (nickname), 
+  nickname CITEXT  REFERENCES users (nickname), 
   forum CITEXT REFERENCES forums (slug),
   UNIQUE (nickname, forum)
 );
@@ -91,8 +91,6 @@ UPDATE
 -- в path id текущего поста
 CREATE 
 OR REPLACE FUNCTION insertPostBeforeFunc() RETURNS TRIGGER AS $$ 
--- DECLARE parentPostID posts.id % type := 0;
---DECLARE @parentPostID SERIAL = 0;
 BEGIN NEW.path = (
   SELECT 
     path 
@@ -111,7 +109,7 @@ FOR EACH ROW EXECUTE PROCEDURE insertPostBeforeFunc();
 
 -- Обновляет количество posts в forums на каждой вставке в posts
 CREATE 
-OR REPLACE FUNCTION insertPostBeforeFunc() RETURNS TRIGGER AS $$ BEGIN 
+OR REPLACE FUNCTION insertPostAfterFunc() RETURNS TRIGGER AS $$ BEGIN 
 UPDATE 
   forums 
 SET 

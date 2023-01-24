@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-		myRouter := gin.New()
+	myRouter := gin.New()
 
 	dbConf := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		conf.DBhost, conf.DBuser, conf.DBpwd, conf.DBname, conf.DBport)
@@ -24,7 +24,7 @@ func main() {
 	}
 	db, err := pgx.NewConnPool(pgx.ConnPoolConfig{
 		ConnConfig:     connStr,
-		MaxConnections: 500,
+		MaxConnections: 200,
 		AfterConnect:   nil,
 		AcquireTimeout: 0,
 	})
