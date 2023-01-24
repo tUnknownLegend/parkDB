@@ -1,91 +1,58 @@
 package main
 
 import (
-	"database/sql"
+	"fmt"
 	"log"
-	"net/http"
-	"os"
 
-	conf "github.com/tUnknownLegend/parkDB/conf"
+	conf "parkDB/config"
+	"parkDB/delivery"
+	"parkDB/repository"
+	"parkDB/usecase"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx"
 )
 
 func main() {
-	myRouter := mux.NewRouter()
-	urlDB := "postgres://" + os.Getenv("TEST_POSTGRES_USER") + ":" + os.Getenv("TEST_POSTGRES_PASSWORD") + "@" + os.Getenv("TEST_DATABASE_HOST") + ":" + os.Getenv("DB_PORT") + "/" + os.Getenv("TEST_POSTGRES_DB")
-	log.Println("conn: ", urlDB)
-	db, err := sql.Open("pgx", urlDB)
+		myRouter := gin.New()
+
+	dbConf := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		conf.DBhost, conf.DBuser, conf.DBpwd, conf.DBname, conf.DBport)
+	connStr, err := pgx.ParseConnectionString(dbConf)
 	if err != nil {
-		log.Println("could not connect to database")
-	} else {
-		log.Println("database is reachable")
+		log.Println(err)
+	}
+	db, err := pgx.NewConnPool(pgx.ConnPoolConfig{
+		ConnConfig:     connStr,
+		MaxConnections: 100,
+		AfterConnect:   nil,
+		AcquireTimeout: 0,
+	})
+	if err != nil {
+		log.Println(err)
 	}
 	defer db.Close()
 
-	// userStore := repository.NewUserStore(db)
-	// productStore := repository.NewProductStore(db)
+	userStore := repository.NewUserRepository(db)
+	forumStore := repository.NewForumRepository(db)
+	postStore := repository.NewPostRepository(db)
+	serviceStore := repository.NewServiceRepository(db)
+	threadStore := repository.NewThreadRepository(db)
 
-	// userUsecase := usecase.NewUserUsecase(userStore, sessManager, mailManager)
-	// productUsecase := usecase.NewProductUsecase(productStore, ordersManager, mailManager)
+	userUsecase := usecase.NewUserUsecase(userStore)
+	forumUsecase := usecase.NewForumUsecase(forumStore, threadStore, userStore)
+	postUsecase := usecase.NewPostUsecase(postStore, userStore, threadStore, forumStore)
+	serviceUsecase := usecase.NewServiceUsecase(serviceStore)
+	threadUsecase := usecase.NewThreadUsecase(threadStore, postStore, userStore)
 
-	// userHandler := deliv.NewUserHandler(userUsecase)
-	// sessionHandler := deliv.NewSessionHandler(userUsecase)
-	// productHandler := deliv.NewProductHandler(productUsecase, userUsecase)
+	routerGroup := myRouter.Group(conf.BasePath)
+	delivery.NewUserHandler(routerGroup, conf.BaseUserPath, userUsecase)
+	delivery.NewForumHandler(routerGroup, conf.BaseForumPath, forumUsecase)
+	delivery.NewPostHandler(routerGroup, conf.BasePostPath, postUsecase)
+	delivery.NewServiceHandler(routerGroup, conf.BaseServicePath, serviceUsecase)
+	delivery.NewThreadHandler(routerGroup, conf.BaseThreadPath, threadUsecase)
 
-	// orderHandler := deliv.NewOrderHandler(userHandler, productHandler)
-
-	// userRouter := myRouter.PathPrefix("/api/v1/user").Subrouter()
-	// cartRouter := myRouter.PathPrefix("/api/v1/cart").Subrouter()
-
-	// myRouter.HandleFunc(conf.PathLogin, sessionHandler.Login).Methods(http.MethodPost, http.MethodOptions)
-	// myRouter.HandleFunc(conf.PathLogOut, sessionHandler.Logout).Methods(http.MethodDelete, http.MethodOptions)
-	// myRouter.HandleFunc(conf.PathSignUp, sessionHandler.SignUp).Methods(http.MethodPost, http.MethodOptions)
-	// myRouter.HandleFunc(conf.PathSessions, sessionHandler.GetSession).Methods(http.MethodGet, http.MethodOptions)
-
-	// myRouter.HandleFunc(conf.PathProductByID, productHandler.GetProductByID).Methods(http.MethodGet, http.MethodOptions)
-	// myRouter.HandleFunc(conf.PathMain, productHandler.GetHomePage).Methods(http.MethodGet, http.MethodOptions)
-	// myRouter.HandleFunc(conf.PathCategory, productHandler.GetProductsByCategory).Methods(http.MethodGet, http.MethodOptions)
-	// myRouter.HandleFunc(conf.PathSeacrh, productHandler.GetProductsBySearch).Methods(http.MethodPost, http.MethodOptions)
-	// myRouter.HandleFunc(conf.PathSuggestions, productHandler.GetSuggestions).Methods(http.MethodPost, http.MethodOptions)
-	// myRouter.HandleFunc(conf.PathRecommendations, productHandler.GetRecommendations).Methods(http.MethodGet, http.MethodOptions)
-	// myRouter.HandleFunc(conf.PathProductsWithDiscount, productHandler.GetProductsWithBiggestDiscount).Methods(http.MethodGet, http.MethodOptions)
-	// myRouter.HandleFunc(conf.PathBestProductCategory, productHandler.GetBestProductInCategory).Methods(http.MethodGet, http.MethodOptions)
-	// myRouter.HandleFunc(conf.PathRecalculateRatings, productHandler.RecalculateRatingsForInitscriptProducts).Methods(http.MethodPost, http.MethodOptions)
-
-	// userRouter.HandleFunc(conf.PathProfile, userHandler.GetUser).Methods(http.MethodGet, http.MethodOptions)
-	// userRouter.HandleFunc(conf.PathProfile, userHandler.ChangeProfile).Methods(http.MethodPost, http.MethodOptions)
-	// userRouter.HandleFunc(conf.PathAvatar, userHandler.SetAvatar).Methods(http.MethodPost, http.MethodOptions)
-	// userRouter.HandleFunc(conf.PathPassword, userHandler.ChangePassword).Methods(http.MethodPost, http.MethodOptions)
-	// userRouter.HandleFunc(conf.PathFavorites, productHandler.GetFavorites).Methods(http.MethodGet, http.MethodOptions)
-	// userRouter.HandleFunc(conf.PathInsertIntoFavorites, productHandler.InsertItemIntoFavorites).Methods(http.MethodPost, http.MethodOptions)
-	// userRouter.HandleFunc(conf.PathDeleteFromFavorites, productHandler.DeleteItemFromFavorites).Methods(http.MethodPost, http.MethodOptions)
-
-	// myRouter.HandleFunc(conf.PathComments, orderHandler.GetComments).Methods(http.MethodGet, http.MethodOptions)
-	// userRouter.HandleFunc(conf.PathMakeComment, orderHandler.CreateComment).Methods(http.MethodPost, http.MethodOptions)
-
-	// cartRouter.HandleFunc("", orderHandler.GetCart).Methods(http.MethodGet, http.MethodOptions)
-	// cartRouter.HandleFunc("", orderHandler.UpdateCart).Methods(http.MethodPost, http.MethodOptions)
-	// cartRouter.HandleFunc(conf.PathAddItemToCart, orderHandler.AddItemToCart).Methods(http.MethodPost, http.MethodOptions)
-	// cartRouter.HandleFunc(conf.PathDeleteItemFromCart, orderHandler.DeleteItemFromCart).Methods(http.MethodPost, http.MethodOptions)
-	// cartRouter.HandleFunc(conf.PathMakeOrder, orderHandler.MakeOrder).Methods(http.MethodPost, http.MethodOptions)
-	// cartRouter.HandleFunc(conf.PathGetOrders, orderHandler.GetOrders).Methods(http.MethodGet, http.MethodOptions)
-	// cartRouter.HandleFunc(conf.PathPromo, orderHandler.SetPromocode).Methods(http.MethodPost, http.MethodOptions)
-	// cartRouter.HandleFunc(conf.PathChangeOrderStatus, orderHandler.ChangeOrderStatus).Methods(http.MethodPost, http.MethodOptions)
-
-	// myRouter.PathPrefix(conf.PathDocs).Handler(httpSwagger.WrapHandler)
-	// myRouter.Use(loggingAndCORSHeadersMiddleware)
-
-	// instrumentation := muxprom.NewDefaultInstrumentation()
-	// myRouter.Use(instrumentation.Middleware)
-	// myRouter.Path("/metrics").Handler(promhttp.Handler())
-
-	// amw := deliv.NewAuthMiddleware(userUsecase)
-
-	// userRouter.Use(amw.CheckAuthMiddleware)
-	// cartRouter.Use(amw.CheckAuthMiddleware)
-
-	err = http.ListenAndServe(conf.Port, myRouter)
+	err = myRouter.Run(conf.ServerPort)
 	if err != nil {
 		log.Println("can't serve", err)
 	}
