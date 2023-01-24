@@ -1,7 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS CITEXT;
 
 CREATE UNLOGGED TABLE IF NOT EXISTS users (
-  nickname CITEXT COLLATE "ucs_basic" PRIMARY KEY, 
+  nickname CITEXT COLLATE "UNICODE" PRIMARY KEY, 
   fullname TEXT NOT NULL, 
   about TEXT, 
   email CITEXT NOT NULL UNIQUE
@@ -39,20 +39,21 @@ CREATE UNLOGGED TABLE IF NOT EXISTS posts (
 );
 
 CREATE UNLOGGED TABLE IF NOT EXISTS votes (
-  nickname CITEXT REFERENCES users (nickname), 
+  nickname CITEXT REFERENCES COLLATE "UNICODE" users (nickname), 
   thread INT REFERENCES threads (id), 
   voice INT NOT NULL,
   UNIQUE (nickname, thread)
 );
 
-CREATE UNLOGGED TABLE IF NOT EXISTS user_forum (
-  nickname CITEXT COLLATE "ucs_basic"  REFERENCES users (nickname), 
+CREATE UNLOGGED TABLE IF NOT EXISTS userForum (
+  nickname CITEXT COLLATE "UNICODE"  REFERENCES users (nickname), 
   forum CITEXT REFERENCES forums (slug),
   UNIQUE (nickname, forum)
 );
 
+-- Обновляет votes у thread после первоначального создания votes
 CREATE 
-OR REPLACE FUNCTION insert_votes_proc() RETURNS TRIGGER AS $$ BEGIN 
+OR REPLACE FUNCTION insertVotesFunc() RETURNS TRIGGER AS $$ BEGIN 
 UPDATE 
   threads 
 SET 
@@ -63,11 +64,13 @@ RETURN NEW;
 END;
 
 $$ language plpgsql;
-CREATE TRIGGER insert_votes 
+CREATE TRIGGER insertVotes 
 AFTER 
-  INSERT ON votes FOR EACH ROW EXECUTE PROCEDURE insert_votes_proc();
+  INSERT ON votes FOR EACH ROW EXECUTE PROCEDURE insertVotesFunc();
+
+-- Обновляет votes у thread после изменения votes
 CREATE 
-OR REPLACE FUNCTION update_votes_proc() RETURNS TRIGGER AS $$ BEGIN 
+OR REPLACE FUNCTION updateVotesFunc() RETURNS TRIGGER AS $$ BEGIN 
 UPDATE 
   threads 
 SET 
@@ -78,27 +81,37 @@ RETURN NEW;
 END;
 
 $$ language plpgsql;
-CREATE TRIGGER update_votes 
+CREATE TRIGGER updateVotes 
 AFTER 
 UPDATE 
-  ON votes FOR EACH ROW EXECUTE PROCEDURE update_votes_proc();
+  ON votes FOR EACH ROW EXECUTE PROCEDURE updateVotesFunc();
+
+-- Сохраянем связь с предыдущеми постами. 
+-- Если пост первый в треде, то первый запрос будет пустой и мы положим
+-- в path id текущего поста
 CREATE 
-OR REPLACE FUNCTION insert_post_before_proc() RETURNS TRIGGER AS $$ DECLARE parent_post_id posts.id % type := 0;
+OR REPLACE FUNCTION insertPostBeforeFunc() RETURNS TRIGGER AS $$ 
+-- DECLARE parentPostID posts.id % type := 0;
+--DECLARE @parentPostID SERIAL = 0;
 BEGIN NEW.path = (
   SELECT 
     path 
   FROM 
     posts 
   WHERE 
-    id = new.parent
+    id = NEW.parent
 ) || NEW.id;
 RETURN NEW;
 END;
 
 $$ LANGUAGE plpgsql;
-CREATE TRIGGER insert_post_before BEFORE INSERT ON posts FOR EACH ROW EXECUTE PROCEDURE insert_post_before_proc();
+CREATE TRIGGER insertPostBefore 
+BEFORE INSERT ON posts 
+FOR EACH ROW EXECUTE PROCEDURE insertPostBeforeFunc();
+
+-- Обновляет количество posts в forums на каждой вставке в posts
 CREATE 
-OR REPLACE FUNCTION insert_post_after_proc() RETURNS TRIGGER AS $$ BEGIN 
+OR REPLACE FUNCTION insertPostBeforeFunc() RETURNS TRIGGER AS $$ BEGIN 
 UPDATE 
   forums 
 SET 
@@ -109,11 +122,13 @@ RETURN NEW;
 END;
 
 $$ LANGUAGE plpgsql;
-CREATE TRIGGER insert_post_after 
+CREATE TRIGGER insertPostAfter 
 AFTER 
-  INSERT ON posts FOR EACH ROW EXECUTE PROCEDURE insert_post_after_proc();
+  INSERT ON posts FOR EACH ROW EXECUTE PROCEDURE insertPostAfterFunc();
+
+-- Обновляет количество threads в forums на каждой вставке в threads
 CREATE 
-OR REPLACE FUNCTION insert_threads_proc() RETURNS TRIGGER AS $$ BEGIN 
+OR REPLACE FUNCTION insertThreadsFunc() RETURNS TRIGGER AS $$ BEGIN 
 UPDATE 
   forums 
 SET 
@@ -124,20 +139,26 @@ RETURN NEW;
 END;
 
 $$ LANGUAGE plpgsql;
-CREATE TRIGGER insert_threads 
+CREATE TRIGGER insertThreads 
 AFTER 
-  INSERT ON threads FOR EACH ROW EXECUTE PROCEDURE insert_threads_proc();
+  INSERT ON threads FOR EACH ROW EXECUTE PROCEDURE insertThreadsFunc();
+
+-- После создания нового thread или post 
+-- вставляем автора и форум, который именили в userForum
 CREATE 
-OR REPLACE FUNCTION add_user() RETURNS TRIGGER AS $$ BEGIN INSERT INTO user_forum (nickname, forum) 
+OR REPLACE FUNCTION addUser() RETURNS TRIGGER AS $$ 
+BEGIN 
+INSERT INTO userForum (nickname, forum) 
 VALUES 
   (NEW.author, NEW.forum) ON CONFLICT do nothing;
 RETURN NEW;
 END;
 
 $$ LANGUAGE plpgsql;
-CREATE TRIGGER insert_new_thread 
+CREATE TRIGGER insertNewThread 
 AFTER 
-  INSERT ON threads FOR EACH ROW EXECUTE PROCEDURE add_user();
-CREATE TRIGGER insert_new_post 
+  INSERT ON threads FOR EACH ROW EXECUTE PROCEDURE addUser();
+
+CREATE TRIGGER insertNewPost 
 AFTER 
-  INSERT ON posts FOR EACH ROW EXECUTE PROCEDURE add_user();
+  INSERT ON posts FOR EACH ROW EXECUTE PROCEDURE addUser();

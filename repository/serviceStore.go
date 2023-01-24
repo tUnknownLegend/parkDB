@@ -20,7 +20,7 @@ func NewServiceRepository(db *pgx.ConnPool) ServiceRepositoryInterface {
 }
 
 func (serviceStore *ServiceStore) ClearDB() (err error) {
-	_, err = serviceStore.db.Exec("TRUNCATE TABLE forums, posts, threads, user_forum, users, votes CASCADE;")
+	_, err = serviceStore.db.Exec("TRUNCATE TABLE forums, posts, threads, userForum, users, votes CASCADE;")
 	return
 }
 

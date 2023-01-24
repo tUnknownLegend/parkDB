@@ -40,7 +40,7 @@ func (forumStore *ForumStore) GetUsersOfForum(slug string, limit int, since stri
 	var resultRows *pgx.Rows
 
 	query := "SELECT users.nickname, users.fullname, users.about, users.email FROM users " +
-		"LEFT JOIN user_forum ON users.nickname = user_forum.nickname WHERE user_forum.forum = $1"
+		"LEFT JOIN userForum ON users.nickname = userForum.nickname WHERE userForum.forum = $1"
 
 	if since != "" {
 		if desc {
