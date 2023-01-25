@@ -1,13 +1,13 @@
 CREATE EXTENSION IF NOT EXISTS CITEXT;
 
-CREATE UNLOGGED TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS users (
   nickname CITEXT PRIMARY KEY, 
   fullname TEXT NOT NULL, 
   about TEXT, 
   email CITEXT NOT NULL UNIQUE
 );
 
-CREATE UNLOGGED TABLE IF NOT EXISTS forums (
+CREATE TABLE IF NOT EXISTS forums (
   title TEXT NOT NULL, 
   forumCreator CITEXT REFERENCES users (nickname), 
   slug CITEXT PRIMARY KEY, 
@@ -15,7 +15,7 @@ CREATE UNLOGGED TABLE IF NOT EXISTS forums (
   threads INT DEFAULT 0
 );
 
-CREATE UNLOGGED TABLE IF NOT EXISTS threads (
+CREATE TABLE IF NOT EXISTS threads (
   id SERIAL PRIMARY KEY, 
   title TEXT NOT NULL, 
   author CITEXT REFERENCES users (nickname), 
@@ -26,7 +26,7 @@ CREATE UNLOGGED TABLE IF NOT EXISTS threads (
   created timestamp with time zone DEFAULT now()
 );
 
-CREATE UNLOGGED TABLE IF NOT EXISTS posts (
+CREATE TABLE IF NOT EXISTS posts (
   id SERIAL PRIMARY KEY, 
   parent INT REFERENCES posts (id), 
   author CITEXT REFERENCES users (nickname), 
@@ -38,14 +38,14 @@ CREATE UNLOGGED TABLE IF NOT EXISTS posts (
   path INT[] DEFAULT ARRAY [] :: INTEGER[]
 );
 
-CREATE UNLOGGED TABLE IF NOT EXISTS votes (
+CREATE TABLE IF NOT EXISTS votes (
   nickname CITEXT REFERENCES users (nickname), 
   thread INT REFERENCES threads (id), 
   voice INT NOT NULL,
   UNIQUE (nickname, thread)
 );
 
-CREATE UNLOGGED TABLE IF NOT EXISTS userForum (
+CREATE TABLE IF NOT EXISTS userForum (
   nickname CITEXT  REFERENCES users (nickname), 
   forum CITEXT REFERENCES forums (slug),
   UNIQUE (nickname, forum)
