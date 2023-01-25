@@ -161,7 +161,6 @@ CREATE TRIGGER insertNewPost
 AFTER 
   INSERT ON posts FOR EACH ROW EXECUTE PROCEDURE addUser();
 
-
 CREATE INDEX IF NOT EXISTS users_idx_nickname_and_email ON users (nickname, email);
 CREATE INDEX IF NOT EXISTS posts_idx_thread ON posts (thread);
 CREATE INDEX IF NOT EXISTS threads_idx_forum_and_created ON threads (forum, created);
