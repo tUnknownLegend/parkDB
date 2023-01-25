@@ -23,7 +23,7 @@ USER postgres
 RUN /etc/init.d/postgresql start && \
     psql --command "CREATE USER dbadmin WITH SUPERUSER PASSWORD 'pwd123SQL';" &&\
     createdb -O dbadmin default_db && \
-    psql -f ./_postgres/init.sql -d default_db && \
+    psql -f ./db/db.sql -d default_db && \
     /etc/init.d/postgresql stop
 
 EXPOSE 5432
