@@ -9,10 +9,9 @@ import (
 	"parkDB/repository"
 	"parkDB/usecase"
 
+	"github.com/Depado/ginprom"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx"
-
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -54,7 +53,12 @@ func main() {
 	delivery.NewServiceHandler(routerGroup, conf.BaseServicePath, serviceUsecase)
 	delivery.NewThreadHandler(routerGroup, conf.BaseThreadPath, threadUsecase)
 
-	myRouter.GET(conf.MetricsPath, gin.WrapH(promhttp.Handler()))
+	p := ginprom.New(
+		ginprom.Engine(myRouter),
+		ginprom.Subsystem("gin"),
+		ginprom.Path(conf.MetricsPath),
+	)
+	myRouter.Use(p.Instrument())
 
 	err = myRouter.Run(conf.ServerPort)
 	if err != nil {
