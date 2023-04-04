@@ -11,6 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -51,6 +53,8 @@ func main() {
 	delivery.NewPostHandler(routerGroup, conf.BasePostPath, postUsecase)
 	delivery.NewServiceHandler(routerGroup, conf.BaseServicePath, serviceUsecase)
 	delivery.NewThreadHandler(routerGroup, conf.BaseThreadPath, threadUsecase)
+
+	myRouter.GET(conf.MetricsPath, gin.WrapH(promhttp.Handler()))
 
 	err = myRouter.Run(conf.ServerPort)
 	if err != nil {
