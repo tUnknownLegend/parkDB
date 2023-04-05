@@ -161,10 +161,10 @@ CREATE TRIGGER insertNewPost
 AFTER 
   INSERT ON posts FOR EACH ROW EXECUTE PROCEDURE addUser();
 
-CREATE INDEX IF NOT EXISTS users_idx_nickname_and_email ON users (nickname, email);
-CREATE INDEX IF NOT EXISTS posts_idx_thread ON posts (thread);
-CREATE INDEX IF NOT EXISTS threads_idx_forum_and_created ON threads (forum, created);
-CREATE INDEX IF NOT EXISTS userForum_idx_nickname ON userForum (nickname);
-CREATE INDEX IF NOT EXISTS posts_idx_thread_and_path_and_parent ON posts ((path[1]), thread, parent NULLS FIRST);
-CREATE INDEX IF NOT EXISTS posts_idx_thread_and_parent_and_id ON posts (thread, id, parent NULLS FIRST);
-CREATE INDEX IF NOT EXISTS posts_thread_thread_and_path ON posts (thread, path);
+-- CREATE INDEX IF NOT EXISTS users_idx_nickname_and_email ON users (nickname, email);
+-- CREATE INDEX IF NOT EXISTS posts_idx_thread ON posts (thread);
+-- CREATE INDEX IF NOT EXISTS threads_idx_forum_and_created ON threads (forum, created);
+-- CREATE INDEX IF NOT EXISTS userForum_idx_nickname ON userForum (nickname);
+-- CREATE INDEX IF NOT EXISTS posts_idx_thread_and_path_and_parent ON posts ((path[1]), thread, parent NULLS FIRST);
+-- CREATE INDEX IF NOT EXISTS posts_idx_thread_and_parent_and_id ON posts (thread, id, parent NULLS FIRST);
+-- CREATE INDEX IF NOT EXISTS posts_thread_thread_and_path ON posts (thread, path);
