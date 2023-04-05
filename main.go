@@ -6,6 +6,7 @@ import (
 
 	conf "parkDB/config"
 	"parkDB/delivery"
+	"parkDB/middleware"
 	"parkDB/repository"
 	"parkDB/usecase"
 
@@ -59,6 +60,7 @@ func main() {
 		ginprom.Path(conf.MetricsPath),
 	)
 	myRouter.Use(p.Instrument())
+	myRouter.Use(middleware.IncCounter)
 
 	err = myRouter.Run(conf.ServerPort)
 	if err != nil {
