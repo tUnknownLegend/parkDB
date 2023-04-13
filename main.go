@@ -16,22 +16,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type CustomAspect struct {
-	CustomValue int
-}
-
-func (a *CustomAspect) GetStats() interface{} {
-	return a.CustomValue
-}
-
-func (a *CustomAspect) Name() string {
-	return "Custom"
-}
-
-func (a *CustomAspect) InRoot() bool {
-	return false
-}
-
 func main() {
 	myRouter := gin.New()
 
@@ -74,7 +58,7 @@ func main() {
 	prometheus.Register(middleware.HitsCounter)
 	myRouter.Use(middleware.IncCounter)
 
-	myRouter.GET(conf.MetricsPath, func(c *gin.Context) {
+	myRouter.GET("/api/service/status", func(c *gin.Context) {
 		handler := promhttp.Handler()
 		handler.ServeHTTP(c.Writer, c.Request)
 	})
