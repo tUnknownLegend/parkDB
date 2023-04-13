@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 
 	conf "parkDB/config"
 	"parkDB/delivery"
@@ -15,37 +14,25 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx"
 	"github.com/penglongli/gin-metrics/ginmetrics"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/collectors"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+type CustomAspect struct {
+	CustomValue int
+}
+
+func (a *CustomAspect) GetStats() interface{} {
+	return a.CustomValue
+}
+
+func (a *CustomAspect) Name() string {
+	return "Custom"
+}
+
+func (a *CustomAspect) InRoot() bool {
+	return false
+}
+
 func main() {
-	// metrics
-
-	// Create non-global registry.
-	registry := prometheus.NewRegistry()
-
-	// Add go runtime metrics and process collectors.
-	registry.MustRegister(
-		collectors.NewGoCollector(),
-		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
-	)
-
-	// Expose /metrics HTTP endpoint using the created custom registry.
-	http.Handle(
-		conf.MetricsPath,
-		middleware.New(
-			registry, nil).
-			WrapHandler(conf.MetricsPath, promhttp.HandlerFor(
-				registry,
-				promhttp.HandlerOpts{}),
-			))
-
-	log.Fatalln(http.ListenAndServe(":5050", nil))
-
-	// end metrics
-
 	myRouter := gin.New()
 
 	dbConf := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
@@ -89,7 +76,9 @@ func main() {
 		ginprom.Subsystem("gin"),
 		ginprom.Path(conf.MetricsPath),
 	)
+	p.Use(myRouter)
 	myRouter.Use(p.Instrument())
+	myRouter.Use(middleware.IncCounter)
 
 	metics := ginmetrics.GetMonitor()
 	metics.SetMetricPath(conf.MetricsPath)
