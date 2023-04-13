@@ -14,6 +14,7 @@ require (
 	github.com/aryann/difflib v0.0.0-20210328193216-ff5ff6dc229b // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/bits-and-blooms/bitset v1.2.0 // indirect
 	github.com/bozaro/golorem v0.0.0-20170501165920-50e5b610280b // indirect
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -93,6 +94,7 @@ require (
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/jackc/puddle/v2 v2.1.2 // indirect
 	github.com/mailru/easyjson v0.7.7
+	github.com/penglongli/gin-metrics v0.1.10
 	github.com/prometheus/client_golang v1.14.0
 	github.com/zsais/go-gin-prometheus v0.1.0
 	gitlab.com/msvechla/mux-prometheus v0.0.2
