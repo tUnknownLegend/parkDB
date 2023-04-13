@@ -80,9 +80,19 @@ func main() {
 	myRouter.Use(middleware.IncCounter)
 
 	metics := ginmetrics.GetMonitor()
-	metics.SetMetricPath("/dev" + conf.MetricsPath)
+	metics.SetMetricPath(conf.MetricsPath)
 	metics.SetSlowTime(5)
 	metics.SetDuration([]float64{0.1, 0.3, 1.2, 5, 10})
+
+	gaugeMetric := &ginmetrics.Metric{
+		Type:        ginmetrics.Counter,
+		Name:        "http_requests",
+		Description: "an example of gauge type metric",
+		Labels:      []string{"label1"},
+	}
+
+	_ = ginmetrics.GetMonitor().AddMetric(gaugeMetric)
+
 	metics.Use(myRouter)
 
 	err = myRouter.Run(conf.ServerPort)
