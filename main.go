@@ -58,7 +58,7 @@ func main() {
 	prometheus.Register(middleware.HitsCounter)
 	myRouter.Use(middleware.IncCounter)
 
-	myRouter.GET("/api/service/status", func(c *gin.Context) {
+	myRouter.GET(conf.MetricsPath, func(c *gin.Context) {
 		handler := promhttp.Handler()
 		handler.ServeHTTP(c.Writer, c.Request)
 	})

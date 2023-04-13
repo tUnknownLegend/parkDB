@@ -11,8 +11,6 @@ var HitsCounter = promauto.NewCounter(prometheus.CounterOpts{
 	Help: "Number of hits to the server",
 })
 
-
-
 func IncCounter(c *gin.Context) {
 	HitsCounter.Inc()
 }
