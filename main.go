@@ -10,10 +10,10 @@ import (
 	"parkDB/repository"
 	"parkDB/usecase"
 
-	"github.com/Depado/ginprom"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx"
-	"github.com/penglongli/gin-metrics/ginmetrics"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type CustomAspect struct {
@@ -71,29 +71,13 @@ func main() {
 	delivery.NewServiceHandler(routerGroup, conf.BaseServicePath, serviceUsecase)
 	delivery.NewThreadHandler(routerGroup, conf.BaseThreadPath, threadUsecase)
 
-	p := ginprom.New(
-		ginprom.Engine(myRouter),
-		ginprom.Subsystem("gin"),
-		ginprom.Path(conf.MetricsPath),
-	)
-	myRouter.Use(p.Instrument())
+	prometheus.Register(middleware.HitsCounter)
 	myRouter.Use(middleware.IncCounter)
 
-	metics := ginmetrics.GetMonitor()
-	metics.SetMetricPath(conf.MetricsPath)
-	metics.SetSlowTime(5)
-	metics.SetDuration([]float64{0.1, 0.3, 1.2, 5, 10})
-
-	gaugeMetric := &ginmetrics.Metric{
-		Type:        ginmetrics.Counter,
-		Name:        "http_requests",
-		Description: "an example of gauge type metric",
-		Labels:      []string{"label1"},
-	}
-
-	_ = ginmetrics.GetMonitor().AddMetric(gaugeMetric)
-
-	metics.Use(myRouter)
+	myRouter.GET(conf.MetricsPath, func(c *gin.Context) {
+		handler := promhttp.Handler()
+		handler.ServeHTTP(c.Writer, c.Request)
+	})
 
 	err = myRouter.Run(conf.ServerPort)
 	if err != nil {
