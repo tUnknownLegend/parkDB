@@ -81,7 +81,7 @@ func main() {
 	myRouter.Use(middleware.IncCounter)
 
 	metics := ginmetrics.GetMonitor()
-	metics.SetMetricPath(conf.MetricsPath)
+	metics.SetMetricPath("/dev" + conf.MetricsPath)
 	metics.SetSlowTime(5)
 	metics.SetDuration([]float64{0.1, 0.3, 1.2, 5, 10})
 	metics.Use(myRouter)
