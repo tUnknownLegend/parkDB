@@ -3,6 +3,7 @@ package delivery
 import (
 	"net/http"
 	conf "parkDB/config"
+	"parkDB/middleware"
 	"parkDB/models"
 	"parkDB/usecase"
 	"strconv"
@@ -25,11 +26,11 @@ func NewThreadHandler(router *gin.RouterGroup, threadURL string, threadUsecase u
 
 	threads := router.Group(handler.ThreadURL)
 	{
-		threads.POST("/:slug_or_id/create", handler.CreatePosts)
-		threads.GET("/:slug_or_id/details", handler.GetDetails)
-		threads.POST("/:slug_or_id/details", handler.UpdateDetails)
-		threads.GET("/:slug_or_id/posts", handler.GetThreadPosts)
-		threads.POST("/:slug_or_id/vote", handler.Vote)
+		threads.POST("/:slug_or_id/create", middleware.IncCounter, handler.CreatePosts)
+		threads.GET("/:slug_or_id/details", middleware.IncCounter, handler.GetDetails)
+		threads.POST("/:slug_or_id/details", middleware.IncCounter, handler.UpdateDetails)
+		threads.GET("/:slug_or_id/posts", middleware.IncCounter, handler.GetThreadPosts)
+		threads.POST("/:slug_or_id/vote", middleware.IncCounter, handler.Vote)
 	}
 }
 

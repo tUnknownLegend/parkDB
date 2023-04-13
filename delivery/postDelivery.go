@@ -3,6 +3,7 @@ package delivery
 import (
 	"net/http"
 	conf "parkDB/config"
+	"parkDB/middleware"
 	"parkDB/models"
 	"parkDB/usecase"
 	"strconv"
@@ -26,8 +27,8 @@ func NewPostHandler(router *gin.RouterGroup, postURL string, postUsecase usecase
 
 	posts := router.Group(handler.PostURL)
 	{
-		posts.GET("/:id/details", handler.GetPost)
-		posts.POST("/:id/details", handler.UpdatePost)
+		posts.GET("/:id/details", middleware.IncCounter, handler.GetPost)
+		posts.POST("/:id/details", middleware.IncCounter, handler.UpdatePost)
 	}
 }
 

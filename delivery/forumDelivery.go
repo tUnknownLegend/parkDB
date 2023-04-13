@@ -3,6 +3,7 @@ package delivery
 import (
 	"net/http"
 	conf "parkDB/config"
+	"parkDB/middleware"
 	"parkDB/models"
 	"parkDB/usecase"
 
@@ -26,11 +27,11 @@ func NewForumHandler(router *gin.RouterGroup, forumURL string, forumUsecase usec
 
 	forums := router.Group(handler.ForumURL)
 	{
-		forums.POST("/create", handler.CreateForum)
-		forums.GET("/:slug/details", handler.GetDetails)
-		forums.POST("/:slug/create", handler.CreateThread)
-		forums.GET("/:slug/users", handler.GetForumUsers)
-		forums.GET("/:slug/threads", handler.GetForumThreads)
+		forums.POST("/create", middleware.IncCounter, handler.CreateForum)
+		forums.GET("/:slug/details", middleware.IncCounter, handler.GetDetails)
+		forums.POST("/:slug/create", middleware.IncCounter, handler.CreateThread)
+		forums.GET("/:slug/users", middleware.IncCounter, handler.GetForumUsers)
+		forums.GET("/:slug/threads", middleware.IncCounter, handler.GetForumThreads)
 	}
 }
 

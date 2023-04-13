@@ -21,14 +21,10 @@ func NewServiceHandler(router *gin.RouterGroup, serviceURL string, serviceUsecas
 		ServiceUsecase: serviceUsecase,
 	}
 
-	MetricsMiddleware := func(context *gin.Context) {
-		middleware.HitsCounter.Inc()
-	}
-
 	service := router.Group(handler.ServiceURL)
 	{
-		service.POST("/clear", handler.ClearService)
-		service.GET("/status", MetricsMiddleware, handler.GetServiceStatus)
+		service.POST("/clear", middleware.IncCounter, handler.ClearService)
+		service.GET("/status", middleware.IncCounter, handler.GetServiceStatus)
 	}
 }
 
