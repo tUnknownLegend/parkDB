@@ -76,7 +76,6 @@ func main() {
 		ginprom.Subsystem("gin"),
 		ginprom.Path(conf.MetricsPath),
 	)
-	p.Use(myRouter)
 	myRouter.Use(p.Instrument())
 	myRouter.Use(middleware.IncCounter)
 
