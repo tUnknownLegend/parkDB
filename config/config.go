@@ -21,6 +21,8 @@ var BaseThreadPath = "/thread"
 var BaseServicePath = "/service"
 var BaseUserPath = "/user"
 
+var MetricsPath = "/metrics"
+
 var Headers = "application/json; charset=utf-8"
 
 var ConflictError = errors.New(strconv.Itoa(http.StatusConflict))

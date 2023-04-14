@@ -3,6 +3,7 @@ package delivery
 import (
 	"net/http"
 	conf "parkDB/config"
+	"parkDB/middleware"
 	"parkDB/models"
 	"parkDB/usecase"
 
@@ -22,8 +23,8 @@ func NewServiceHandler(router *gin.RouterGroup, serviceURL string, serviceUsecas
 
 	service := router.Group(handler.ServiceURL)
 	{
-		service.POST("/clear", handler.ClearService)
-		service.GET("/status", handler.GetServiceStatus)
+		service.POST("/clear", middleware.IncCounter, handler.ClearService)
+		service.GET("/status", middleware.IncCounter, handler.GetServiceStatus)
 	}
 }
 

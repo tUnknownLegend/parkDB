@@ -6,11 +6,14 @@ import (
 
 	conf "parkDB/config"
 	"parkDB/delivery"
+	"parkDB/middleware"
 	"parkDB/repository"
 	"parkDB/usecase"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -51,6 +54,14 @@ func main() {
 	delivery.NewPostHandler(routerGroup, conf.BasePostPath, postUsecase)
 	delivery.NewServiceHandler(routerGroup, conf.BaseServicePath, serviceUsecase)
 	delivery.NewThreadHandler(routerGroup, conf.BaseThreadPath, threadUsecase)
+
+	prometheus.Register(middleware.HitsCounter)
+	myRouter.Use(middleware.IncCounter)
+
+	myRouter.GET(conf.MetricsPath, func(c *gin.Context) {
+		handler := promhttp.Handler()
+		handler.ServeHTTP(c.Writer, c.Request)
+	})
 
 	err = myRouter.Run(conf.ServerPort)
 	if err != nil {
